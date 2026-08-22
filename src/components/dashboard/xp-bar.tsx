@@ -6,8 +6,8 @@ import { Flame, Star, Zap } from 'lucide-react';
 import type { Stats } from '@/store/use-jee-store';
 
 export function XPBar({ stats }: { stats: Stats }) {
-  const { profile } = stats;
-  const { xp } = stats;
+  const profile = stats?.profile ?? null;
+  const xp = stats?.xp ?? { totalXP: 0, currentLevel: 1, xpPercentage: 0, xpInCurrentLevel: 0, xpNeeded: 100 };
 
   const streak = profile?.currentStreak ?? 0;
 

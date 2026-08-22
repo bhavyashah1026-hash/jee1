@@ -33,7 +33,7 @@ export async function GET() {
     const xpForNextLevel = currentLevel * currentLevel * 100;
     const xpProgress = xpForNextLevel - xpForCurrentLevel;
     const xpInCurrentLevel = totalXP - xpForCurrentLevel;
-    const xpPercentage = Math.min((xpInCurrentLevel / xpProgress) * 100, 100);
+    const xpPercentage = xpProgress > 0 ? Math.min((xpInCurrentLevel / xpProgress) * 100, 100) : 0;
 
     // Last 7 days study minutes
     const sevenDaysAgo = new Date();

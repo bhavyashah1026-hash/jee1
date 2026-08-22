@@ -29,18 +29,31 @@ export default function Home() {
   const fetchStats = useCallback(async () => {
     try {
       const res = await fetch('/api/stats');
+      if (!res.ok) return;
       const data = await res.json();
-      setStats(data);
+      // Only set if the response has the expected shape
+      if (data && typeof data.xp === 'object') {
+        setStats(data);
+      }
     } catch {/* silent */}
   }, [setStats]);
 
   // Initialize: seed DB then fetch all data
   useEffect(() => {
     const init = async () => {
+      // Seed the database first (idempotent)
       try {
         await fetch('/api/seed', { method: 'POST' });
       } catch {/* silent */}
+
+      // Fetch stats with a retry in case seed hasn't fully settled
       await fetchStats();
+      if (!useJEEStore.getState().stats) {
+        // Retry once after a short delay
+        await new Promise((r) => setTimeout(r, 500));
+        await fetchStats();
+      }
+
       setInitialized(true);
     };
     init();
@@ -96,7 +109,7 @@ export default function Home() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Zap className="w-4 h-4 text-amber-400" />
-                  <span className="text-sm font-mono font-bold">{stats.xp.totalXP}</span>
+                  <span className="text-sm font-mono font-bold">{stats.xp?.totalXP ?? 0}</span>
                 </div>
               </div>
             )}

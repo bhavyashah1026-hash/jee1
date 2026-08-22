@@ -33,7 +33,12 @@ export function StatsPanel({ stats, onRefresh }: StatsPanelProps) {
     );
   }
 
-  const { profile, taskStats, xp, subjectStats, recentStreaks, recentSessions } = stats;
+  const profile = stats.profile ?? null;
+  const taskStats = stats.taskStats ?? { completedToday: 0, totalToday: 0, pendingToday: 0, inProgressToday: 0 };
+  const xp = stats.xp ?? { totalXP: 0, currentLevel: 1, xpPercentage: 0, xpInCurrentLevel: 0, xpNeeded: 100 };
+  const subjectStats = stats.subjectStats ?? [];
+  const recentStreaks = stats.recentStreaks ?? [];
+  const recentSessions = stats.recentSessions ?? [];
 
   const totalHours = profile ? Math.round(profile.totalStudyMinutes / 60 * 10) / 10 : 0;
   const longestStreak = profile?.longestStreak ?? 0;
