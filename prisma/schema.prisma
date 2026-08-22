@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Subjects for JEE preparation
+model Subject {
+  id          String   @id @default(cuid())
+  name        String   // Physics, Chemistry, Mathematics
+  color       String   // hex color for UI theming
+  icon        String   // lucide icon name
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tasks       Task[]
+  sessions    StudySession[]
+  routines    Routine[]
+}
+
+// Daily quests / tasks
+model Task {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  subjectId   String?
+  subject     Subject? @relation(fields: [subjectId], references: [id])
+  
+  // Quest difficulty
+  difficulty  String   @default("normal") // easy, normal, hard, extreme, legendary
+  
+  // XP rewards based on difficulty
+  xpReward    Int      @default(10)
+  
+  // Time tracking
+  estimatedMinutes Int?
+  actualMinutes    Int?
+  
+  // Status
+  status      String   @default("pending") // pending, in_progress, completed, skipped
+  priority    String   @default("medium") // low, medium, high, critical
+  
+  // Scheduling
+  scheduledFor String? // ISO date string YYYY-MM-DD
+  completedAt  DateTime?
+  
+  // Ordering
+  orderIndex  Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Study session timer logs
+model StudySession {
+  id          String   @id @default(cuid())
+  subjectId   String?
+  subject     Subject? @relation(fields: [subjectId], references: [id])
+  taskId      String?
+  
+  durationMinutes Int
+  mode        String   @default("focus") // focus, break, deep_work
+  
+  startedAt   DateTime @default(now())
+  endedAt     DateTime?
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Daily streak tracking
+model Streak {
+  id          String   @id @default(cuid())
+  date        String   @unique // YYYY-MM-DD
+  tasksCompleted Int    @default(0)
+  totalXP      Int      @default(0)
+  studyMinutes Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// User profile (singleton, for XP, level, settings)
+model UserProfile {
+  id          String   @id @default(cuid())
+  totalXP     Int      @default(0)
+  level       Int      @default(1)
+  currentStreak Int    @default(0)
+  longestStreak Int    @default(0)
+  totalStudyMinutes Int @default(0)
+  totalTasksCompleted Int @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Time-based routine blocks
+model Routine {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  subjectId   String?
+  subject     Subject? @relation(fields: [subjectId], references: [id])
+  
+  // Time window
+  startTime   String   // HH:mm format
+  endTime     String   // HH:mm format
+  
+  // Days active (comma-separated: "1,2,3,4,5" for Mon-Fri)
+  daysActive  String   @default("1,2,3,4,5,6,7")
+  
+  isActive    Boolean  @default(true)
+  color       String   @default("#6366f1")
+  
+  orderIndex  Int      @default(0)
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
